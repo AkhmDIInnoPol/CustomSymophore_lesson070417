@@ -6,9 +6,9 @@ package com.company;
 public class Consumer {
 
 
-    private int[] cubatorValues;
-    private int[] quadratorValues;
-    private int[] prostatorValues;
+    private static Object notifierForCubator = new Object();
+    private static Object notifierForQuadrator = new Object();
+    private static Object notifierForProstator = new Object();
 
 
     private final String CUBATOR_NAME = "com.company.Cubator";
@@ -30,7 +30,7 @@ public class Consumer {
 
 
 
-    public synchronized void sum(int resCubator, int resQuadrator, int resProstator)
+    public void sum(int resCubator, int resQuadrator, int resProstator)
     {
         String currentThreadClassName = new Exception().getStackTrace()[1].getClassName();;
 
@@ -39,14 +39,16 @@ public class Consumer {
             System.out.println("Cubator enter");
             if (CUBATOR_NAME.equals(isCubatorEntered))
             {
-                try {
-                    this.wait();
-                }
-                catch (InterruptedException ex)
+                synchronized (notifierForCubator)
                 {
-                    ex.printStackTrace();
+                    try {
+                        notifierForCubator.wait();
+                    }
+                    catch (InterruptedException ex)
+                    {
+                        ex.printStackTrace();
+                    }
                 }
-
             }
             isCubatorEntered = CUBATOR_NAME;
         }
@@ -56,14 +58,16 @@ public class Consumer {
             System.out.println("Quadrator enter");
             if (QUADRATOR_NAME.equals(isQuadratorEntered))
             {
-                try {
-                    this.wait();
-                }
-                catch (InterruptedException ex)
+                synchronized (notifierForQuadrator)
                 {
-                    ex.printStackTrace();
+                    try {
+                        notifierForQuadrator.wait();
+                    }
+                    catch (InterruptedException ex)
+                    {
+                        ex.printStackTrace();
+                    }
                 }
-
             }
 
             isQuadratorEntered = QUADRATOR_NAME;
@@ -74,14 +78,16 @@ public class Consumer {
             System.out.println("Prostator enter");
             if (PROSTATOR_NAME.equals(isProstatorEntered))
             {
-                try {
-                    this.wait();
-                }
-                catch (InterruptedException ex)
+                synchronized (notifierForProstator)
                 {
-                    ex.printStackTrace();
+                    try {
+                        notifierForProstator.wait();
+                    }
+                    catch (InterruptedException ex)
+                    {
+                        ex.printStackTrace();
+                    }
                 }
-
             }
 
             isProstatorEntered = PROSTATOR_NAME;
@@ -98,19 +104,28 @@ public class Consumer {
         {
             System.out.println("Cubator exit");
             isCubatorEntered = "";
-            this.notify();
+            synchronized (notifierForCubator)
+            {
+                notifierForCubator.notify();
+            }
         }
         if (currentThreadClassName.equals(QUADRATOR_NAME))
         {
             System.out.println("Quadrator exit");
             isQuadratorEntered = "";
-            this.notify();
+            synchronized (notifierForQuadrator)
+            {
+                notifierForQuadrator.notify();
+            }
         }
         if (currentThreadClassName.equals(PROSTATOR_NAME))
         {
             System.out.println("Prostator exit");
             isProstatorEntered = "";
-            this.notify();
+            synchronized (notifierForProstator)
+            {
+                notifierForProstator.notify();
+            }
         }
     }
 
